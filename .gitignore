@@ -1,3 +1,10 @@
 *.o
 *.hex
 *.elf
+*.map
+*.lst
+*.eep
+*.bin
+**/build/
+**/build/**
+.vscode/

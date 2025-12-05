@@ -1,9 +1,12 @@
 # Shared Makefile for AVR projects
-# Adjust DEVICE, CLOCK, and PROGRAMMER as needed for each MCU or programmer
+# Adjust DEVICE, CLOCK, PROGRAMMER, and FUSES as needed for each MCU or programmer
 DEVICE      = attiny85
 CLOCK       = 8000000
 PROGRAMMER  = -c usbasp
-OBJECTS     = main.o
+OBJDIR      = build
+OBJECTS     = $(OBJDIR)/main.o
+ELF         = $(OBJDIR)/main.elf
+HEX         = $(OBJDIR)/main.hex
 
 # Fuse settings for ATtiny85; update for other chips
 FUSES       = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
@@ -13,16 +16,19 @@ COMPILE     = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 all: main.hex
 
-.c.o:
+$(OBJDIR):
+	mkdir -p $@
+
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(COMPILE) -c $< -o $@
 
-.S.o:
+$(OBJDIR)/%.o: %.S | $(OBJDIR)
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@
 
 .c.s:
 	$(COMPILE) -S $< -o $@
 
-flash: all
+flash: main.hex
 	$(AVRDUDE) -U flash:w:main.hex:i
 
 fuse:
@@ -30,19 +36,26 @@ fuse:
 
 install: flash fuse
 
-load: all
+load: main.hex
 	bootloadHID main.hex
 
 clean:
-	rm -f main.hex main.elf $(OBJECTS)
+	rm -rf $(OBJDIR)
+	rm -f main.hex main.elf
 
-main.elf: $(OBJECTS)
-	$(COMPILE) -o main.elf $(OBJECTS)
+$(ELF): $(OBJECTS)
+	$(COMPILE) -o $@ $^
 
-main.hex: main.elf
-	rm -f main.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size --format=avr --mcu=$(DEVICE) main.elf
+$(HEX): $(ELF)
+	rm -f $@
+	avr-objcopy -j .text -j .data -O ihex $< $@
+	avr-size --format=avr --mcu=$(DEVICE) $<
+
+main.elf: $(ELF)
+	ln -sf $(ELF) $@
+
+main.hex: $(HEX)
+	ln -sf $(HEX) $@
 
 disasm: main.elf
 	avr-objdump -d main.elf

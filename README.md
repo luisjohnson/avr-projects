@@ -108,7 +108,17 @@ A reusable Makefile under `attiny85/01-blink-led/` orchestrates `avr-gcc`, `avr-
 - Debug/analysis helpers: `disasm` shows the generated assembly, `cpp` runs the C preprocessor output.
 - Utility targets: `clean` removes generated artifacts; `load` is provided as an example if you use a different bootloader workflow.
 
-Run `make` to build everything, `make flash` to program the chip, `make fuse` to write fuses, and `make clean` to wipe build artifacts. Adjust `AVRDUDE`, `COMPILE`, or `FUSES` in the Makefile only when you need a different toolchain configuration or fuse setup.
+Run `make` to build everything, `make flash` to program the chip, `make fuse` to write fuses, and `make clean` to wipe build artifacts. Build artifacts and object files live in the `build/` directory while `main.hex` and `main.elf` remain as symlinks in the project root, so clean removes both the directory and the links. Adjust `AVRDUDE`, `COMPILE`, or `FUSES` in the Makefile only when you need a different toolchain configuration or fuse setup.
+
+### Using the shared Makefile
+
+1. Copy the template directory (`template/`) to a new project folder (e.g., `cp -r template attiny-project-01`).
+2. Change into the new folder and edit `main.c` or add additional source files; the Makefile automatically builds every `.c` file it lists in `OBJECTS`.
+3. If you switch MCUs, clock speeds, or programmers, edit `DEVICE`, `CLOCK`, `PROGRAMMER`, and `FUSES` at the top of the copied Makefile before building.
+4. Run `make` to compile and generate `main.hex`, `make flash` to upload over the configured programmer, and `make fuse` when you need to redefine the device fuses.
+5. Use `make clean` to drop artifacts, `make disasm` to review generated assembly, and `make cpp` to inspect the preprocessed output.
+
+The build directory is shared by every target, so additional sources also place their `.o`, `.elf`, and `.hex` files under `build/`. You can inspect those files directly for debugging or keep the build folder git-ignored to keep the repo tree tidy.
 
 ## Project Template
 
