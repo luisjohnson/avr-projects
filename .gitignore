@@ -9,3 +9,17 @@
 **/build/**
 .vscode/
 .ycm_extra_conf.py
+
+# Explicit per-project build dirs
+attiny85/**/build/
+
+# MacOS files
+.DS_Store
+
+# YouComplete files
+.ycm_cache/
+.ycm_extra_conf.py
+
+#vim swap files
+*.swp
+

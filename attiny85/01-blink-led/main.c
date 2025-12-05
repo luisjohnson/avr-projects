@@ -1,4 +1,8 @@
+#ifdef __AVR_ATtiny85__
 #include <avr/io.h>
+#else
+#error "This example requires -mmcu=attiny85 or __AVR_ATtiny85__ defined"
+#endif
 #include <util/delay.h>
 
 int main()
