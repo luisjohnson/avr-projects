@@ -128,7 +128,31 @@ For each new AVR project, start by copying the shared template directory at `tem
 - Replace `main.c` with your new code and keep the `Makefile` unless you need MCU-specific adjustments.
 - Update `DEVICE`, `CLOCK`, and `PROGRAMMER` in the copied Makefile if you switch MCUs or programmers, and set `FUSES` appropriately.
 
+### Creating projects via script
+
+Run `./scripts/new_project.py <project-name>` (add `--device`, `--clock`, `--programmer`, and `--fuses` if the defaults need tweaking) to copy `template/` to the specified directory and optionally override the Makefile presets. The script mimics `cp -r template ...` but also keeps the existing Makefile logic in sync automatically so new folders always start from the shared workflow.
+
 If you prefer automation, consider adding a small shell script to `create-project.sh` that copies the template and optionally initializes a git branch so every new project starts from the same baseline.
+
+## VS Code IntelliSense
+
+Run `./scripts/gen_c_cpp_props.py` (or `python scripts/gen_c_cpp_props.py`) from the repo root to regenerate `.vscode/c_cpp_properties.json` so the include paths and compiler settings match the OS you are working on. The script currently knows the macOS Homebrew `avr-gcc` install and common Linux AVR toolchain layouts and will overwrite the file with the appropriate configuration for the detected platform.
+
+## Vim / YouCompleteMe
+
+YouCompleteMe relies on a `.ycm_extra_conf.py` file near the project root. Run `./scripts/gen_ycm_conf.py` (or `python scripts/gen_ycm_conf.py`) to drop a platform-specific configuration that mirrors the same include paths and compilation flags used by the VS Code helper. Keep the generated `.ycm_extra_conf.py` next to your source files so Vim’s completion engine picks up the correct AVR headers on macOS and Linux.
+
+## Scripts directory
+
+`scripts/` houses workspace helpers that regenerate editor configurations so you don't need to manually edit `.vscode/c_cpp_properties.json` or `.ycm_extra_conf.py` whenever you switch environments. All helpers live under `scripts/` as executable Python files run from the repo root.
+
+### Script reference
+
+| Script | Purpose | Example |
+| --- | --- | --- |
+| `scripts/gen_c_cpp_props.py` | Regenerates `.vscode/c_cpp_properties.json` with platform-specific include paths and compiler settings for the AVR toolchain. | `./scripts/gen_c_cpp_props.py` |
+| `scripts/gen_ycm_conf.py` | Emits a `.ycm_extra_conf.py` file that points YouCompleteMe to the same AVR headers used by VS Code. | `./scripts/gen_ycm_conf.py` |
+| `scripts/new_project.py` | Copies `template/` into a new project directory and optionally overrides the Makefile defaults via command-line flags. | `./scripts/new_project.py blink-demo --clock 1000000` |
 
 ## Pinout Reference
 
