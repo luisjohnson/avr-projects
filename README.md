@@ -1,4 +1,8 @@
-# ATtiny85 Example Projects
+# AVR Projects
+
+## AVR Projects organized by MCU
+
+### ATtiny85
 
 This repository contains example code and projects for programming the ATtiny85 microcontroller.
 
