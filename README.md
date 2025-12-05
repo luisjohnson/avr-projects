@@ -95,6 +95,31 @@ Connect the LED between PB0 and GND with a current-limiting resistor as shown:
 
 Use digital pin PB0 to drive the LED, and keep VCC at 5V (or 3.3V depending on your board) with GND shared. The resistor prevents overcurrent.
 
+## Build Makefile
+
+A reusable Makefile under `attiny85/01-blink-led/` orchestrates `avr-gcc`, `avr-objcopy`, and `avrdude` so every AVR project in this repo can share the same build/upload process. Key variables and targets include:
+
+- `DEVICE`, `CLOCK`, and `PROGRAMMER`: define the MCU, clock frequency, and programmer interface (`usbasp` by default). Update these if you move to a different chip, clock, or programmer.
+- `AVRDUDE` and `COMPILE`: helper macros that keep the actual commands readable: `AVRDUDE` runs the configured upload tool, while `COMPILE` invokes `avr-gcc` with optimizations, warning flags, and the MCU definition.
+- `all` (default): builds `main.elf` and then converts it into `main.hex` via `avr-objcopy` and reports size with `avr-size`.
+- `flash`: runs `avrdude` to write `main.hex` to flash; depends on `all`, so it always rebuilds before programming.
+- `fuse`: locks in the fuse settings (`lfuse`, `hfuse`, `efuse`) used for the ATtiny85 project.
+- `install`: convenient alias that flashes and programs the fuse settings in one command (needed by some IDEs such as Xcode).
+- Debug/analysis helpers: `disasm` shows the generated assembly, `cpp` runs the C preprocessor output.
+- Utility targets: `clean` removes generated artifacts; `load` is provided as an example if you use a different bootloader workflow.
+
+Run `make` to build everything, `make flash` to program the chip, `make fuse` to write fuses, and `make clean` to wipe build artifacts. Adjust `AVRDUDE`, `COMPILE`, or `FUSES` in the Makefile only when you need a different toolchain configuration or fuse setup.
+
+## Project Template
+
+For each new AVR project, start by copying the shared template directory at `template/`. It contains the reusable Makefile described above plus a minimal `main.c` that toggles PB0, so you can rapidly copy/paste or branch into a new folder without retyping the build logic. When setting up a new project:
+
+- Duplicate `template/` to a new directory (e.g., `cp -r template project-name`).
+- Replace `main.c` with your new code and keep the `Makefile` unless you need MCU-specific adjustments.
+- Update `DEVICE`, `CLOCK`, and `PROGRAMMER` in the copied Makefile if you switch MCUs or programmers, and set `FUSES` appropriately.
+
+If you prefer automation, consider adding a small shell script to `create-project.sh` that copies the template and optionally initializes a git branch so every new project starts from the same baseline.
+
 ## Pinout Reference
 
 ```
